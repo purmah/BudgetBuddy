@@ -2,6 +2,14 @@
 
 A full-stack web application for managing personal finances, tracking expenses, and achieving budget goals.
 
+## 🌐 Live Demo
+
+**[View Live Application](#)** https://budgetbuddy-607t.onrender.com**
+
+**Demo Credentials:**
+- Email: `demo@budgetbuddy.com`
+- Password: `demo123`
+
 ## 🌟 Features
 
 ### Core Functionality
@@ -151,14 +159,6 @@ Download expense data as spreadsheet for:
 - Input validation on all forms
 - Rate limiting on API endpoints
 - SSL/TLS for database connections
-
-## 🌐 Live Demo
-
-**[View Live Application](#)** **
-
-**Demo Credentials:**
-- Email: `demo@budgetbuddy.com`
-- Password: `demo123`
 
 ## 📝 API Endpoints
 
