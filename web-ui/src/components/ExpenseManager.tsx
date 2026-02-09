@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Plus, Trash2, X,Search,Download} from 'lucide-react';
+import {Plus, Trash2, X,Download} from 'lucide-react';
 import {useFinanceData} from '../hooks/useFinanceData';
 import {useAuth} from '../hooks/useAuth';
 import {ExpenseCategory} from '../types';

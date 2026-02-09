@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, X, Target, AlertCircle, CheckCircle } from 'lucide-react';
 import { useFinanceData } from '../hooks/useFinanceData';
 import { useAuth } from '../hooks/useAuth';
@@ -8,28 +8,32 @@ interface BudgetGoal {
     id: string;
     category: ExpenseCategory;
     limit: number;
-    month: string; // YYYY-MM format
+    month: string; // Format: YYYY-MM
 }
 
 const BudgetGoals: React.FC = () => {
     const { user } = useAuth();
     const { expenses } = useFinanceData(user?.id);
-    // Load budget goals from localStorage on mount
-const [budgetGoals, setBudgetGoals] = useState<BudgetGoal[]>(() => {
-    const saved = localStorage.getItem('budgetbuddy_goals');
-    return saved ? JSON.parse(saved) : [];
-});
+    
+    // Load budget goals from localStorage
+    const [budgetGoals, setBudgetGoals] = useState<BudgetGoal[]>(() => {
+        const saved = localStorage.getItem('budgetbuddy_goals');
+        return saved ? JSON.parse(saved) : [];
+    });
 
-// Save to localStorage whenever budget goals change
-React.useEffect(() => {
-    localStorage.setItem('budgetbuddy_goals', JSON.stringify(budgetGoals));
-}, [budgetGoals]);
+    // Form state
     const [showForm, setShowForm] = useState(false);
     const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.Food);
     const [limit, setLimit] = useState('');
 
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const currentMonth = new Date().toISOString().slice(0, 7);
 
+    // Save budget goals to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('budgetbuddy_goals', JSON.stringify(budgetGoals));
+    }, [budgetGoals]);
+
+    // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!limit) return;
@@ -47,18 +51,22 @@ React.useEffect(() => {
         );
 
         setBudgetGoals([...filteredGoals, newGoal]);
+        
+        // Reset form
         setLimit('');
         setCategory(ExpenseCategory.Food);
         setShowForm(false);
     };
 
+    // Delete a budget goal
     const deleteGoal = (id: string) => {
         setBudgetGoals(budgetGoals.filter(g => g.id !== id));
     };
 
-    // Calculate spending for each budget goal
+    // Calculate total spending for a specific budget goal
     const getSpendingForGoal = (goal: BudgetGoal) => {
         const [year, month] = goal.month.split('-');
+        
         const categoryExpenses = expenses.filter(expense => {
             const expenseDate = new Date(expense.createdDate);
             return (
@@ -67,21 +75,25 @@ React.useEffect(() => {
                 expenseDate.getMonth() === parseInt(month) - 1
             );
         });
+        
         return categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     };
 
+    // Get progress bar color based on percentage
     const getProgressColor = (percentage: number) => {
         if (percentage >= 100) return 'bg-red-500';
         if (percentage >= 80) return 'bg-yellow-500';
         return 'bg-green-500';
     };
 
+    // Get status icon based on percentage
     const getStatusIcon = (percentage: number) => {
         if (percentage >= 100) return <AlertCircle className="w-5 h-5 text-red-600" />;
         if (percentage >= 80) return <AlertCircle className="w-5 h-5 text-yellow-600" />;
         return <CheckCircle className="w-5 h-5 text-green-600" />;
     };
 
+    // Filter goals for current month
     const currentMonthGoals = budgetGoals.filter(g => g.month === currentMonth);
 
     return (
@@ -113,6 +125,7 @@ React.useEffect(() => {
             {showForm && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
+                        {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-lg font-semibold text-gray-900">Set Budget Goal</h2>
                             <button
@@ -122,7 +135,10 @@ React.useEffect(() => {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
+
+                        {/* Form */}
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            {/* Category Select */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Category
@@ -137,6 +153,8 @@ React.useEffect(() => {
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Limit Input */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Monthly Limit ($)
@@ -151,12 +169,16 @@ React.useEffect(() => {
                                     required
                                 />
                             </div>
+
+                            {/* Info Message */}
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                 <p className="text-sm text-blue-800">
                                     This will set a budget limit for <strong>{category}</strong> expenses in{' '}
                                     {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
                                 </p>
                             </div>
+
+                            {/* Form Actions */}
                             <div className="flex space-x-3">
                                 <button
                                     type="submit"
@@ -182,14 +204,17 @@ React.useEffect(() => {
                 <div className="p-6 border-b border-gray-200">
                     <h2 className="text-lg font-semibold text-gray-900">Active Budget Goals</h2>
                 </div>
+                
                 <div className="p-6">
                     {currentMonthGoals.length === 0 ? (
+                        // Empty State
                         <div className="text-center py-8">
                             <Target className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                             <p className="text-gray-500">No budget goals set for this month</p>
                             <p className="text-sm text-gray-400 mt-1">Click "Set Budget Goal" to get started</p>
                         </div>
                     ) : (
+                        // Goals List
                         <div className="space-y-6">
                             {currentMonthGoals.map((goal) => {
                                 const spent = getSpendingForGoal(goal);
@@ -198,6 +223,7 @@ React.useEffect(() => {
 
                                 return (
                                     <div key={goal.id} className="border border-gray-200 rounded-lg p-4">
+                                        {/* Goal Header */}
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center space-x-3">
                                                 {getStatusIcon(percentage)}
@@ -208,6 +234,7 @@ React.useEffect(() => {
                                                     </p>
                                                 </div>
                                             </div>
+                                            
                                             <div className="flex items-center space-x-3">
                                                 <div className="text-right">
                                                     <p className={`text-sm font-medium ${
@@ -251,6 +278,7 @@ React.useEffect(() => {
                                                 </p>
                                             </div>
                                         )}
+                                        
                                         {percentage >= 80 && percentage < 100 && (
                                             <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                                                 <p className="text-sm text-yellow-800 font-medium">
@@ -269,18 +297,23 @@ React.useEffect(() => {
             {/* Summary Stats */}
             {currentMonthGoals.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Total Budget */}
                     <div className="bg-white rounded-lg border border-gray-200 p-4">
                         <p className="text-sm text-gray-500 mb-1">Total Budget</p>
                         <p className="text-2xl font-bold text-gray-900">
                             ${currentMonthGoals.reduce((sum, g) => sum + g.limit, 0).toFixed(2)}
                         </p>
                     </div>
+
+                    {/* Total Spent */}
                     <div className="bg-white rounded-lg border border-gray-200 p-4">
                         <p className="text-sm text-gray-500 mb-1">Total Spent</p>
                         <p className="text-2xl font-bold text-blue-600">
                             ${currentMonthGoals.reduce((sum, g) => sum + getSpendingForGoal(g), 0).toFixed(2)}
                         </p>
                     </div>
+
+                    {/* Goals On Track */}
                     <div className="bg-white rounded-lg border border-gray-200 p-4">
                         <p className="text-sm text-gray-500 mb-1">Goals On Track</p>
                         <p className="text-2xl font-bold text-green-600">
