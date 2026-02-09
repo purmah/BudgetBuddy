@@ -38,17 +38,17 @@ app.use((req, res, next) => {
     next();
 });
 
-// API routes
+// API routes - These must come FIRST
 app.use('/api', routes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-    // Serve static files from the React app
-    app.use(express.static(path.join(__dirname, '../web-ui/dist')));
+    // Serve static files from React build
+    app.use(express.static(path.join(__dirname, '../../web-ui/dist')));
 
-    // Handle React routing, return all requests to React app
+    // Handle React routing - this catches all NON-API routes
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../web-ui/dist', 'index.html'));
+        res.sendFile(path.join(__dirname, '../../web-ui/dist', 'index.html'));
     });
 } else {
     // Welcome route (only in development)
@@ -68,11 +68,11 @@ if (process.env.NODE_ENV === 'production') {
             }
         });
     });
+    
+    // Error handling for development
+    app.use(notFoundHandler);
+    app.use(errorHandler);
 }
-
-// Error handling middleware
-app.use(notFoundHandler);
-app.use(errorHandler);
 
 // Initialize database and start server
 const startServer = async () => {
