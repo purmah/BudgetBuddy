@@ -4,7 +4,7 @@ A full-stack web application for managing personal finances, tracking expenses, 
 
 ## 🌐 Live Demo
 
-**[View Live Application](#)** https://budgetbuddy-607t.onrender.com**
+**[View Live Application]** : https://budgetbuddy-607t.onrender.com
 
 **Demo Credentials:**
 - Email: `demo@budgetbuddy.com`
